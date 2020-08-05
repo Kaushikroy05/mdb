@@ -1,0 +1,3 @@
+
+class SBMultipleJobs(Exception):
+    pass

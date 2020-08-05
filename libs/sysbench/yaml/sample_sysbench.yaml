@@ -1,0 +1,50 @@
+sysbench:
+    config_test:
+        options:
+            mysql-host:     localhost
+            mysql-port:     3306
+            mysql-user:     usertest
+            mysql-password: TEST123
+            verbosity:      5
+            cpu-max-prime:  20000
+        testname:   cpu
+        command:
+            - prepare
+            - run
+            - cleanup
+
+    config_new:
+        options:
+            mysql-host:     localhost
+            mysql-port:     3306
+            mysql-user:     usertest
+            mysql-password: TEST123
+            verbosity:      5
+        testname:   memory
+        command:    run
+
+workload:
+    workload_1:
+        config: config_test
+        clients:
+            - localhost
+
+    workload_2:
+        config:     config_new
+        clients:
+            - localhost
+            - localhost
+            - localhost
+            - localhost
+
+job:
+    job_1:
+        - workload_1
+        - workload_2
+    job_2:
+        - workload_1
+
+
+
+
+

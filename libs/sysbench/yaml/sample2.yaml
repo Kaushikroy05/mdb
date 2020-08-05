@@ -1,0 +1,41 @@
+sysbench:
+    config_cpu:
+        options:
+            mysql-host:     localhost
+            mysql-port:     3406
+            mysql-user:     usertest
+            mysql-password: TEST123
+            mysql-socket:   /tmp/mariadbdev.sock
+            verbosity:      5
+            cpu-max-prime:  20000
+        testname:   cpu
+        commands:   run
+
+    config_lua:
+        options:
+            mysql-host:     localhost
+            mysql-port:     3406
+            mysql-user:     usertest
+            mysql-password: TEST123
+            mysql-socket:   /tmp/mariadbdev.sock
+            verbosity:      5
+            threads:        4
+            tables:         10
+            table-size:     1000
+        testname:   /usr/local/Cellar/sysbench/1.0.20/share/sysbench/oltp_read_only.lua
+        commands:   [prepare,run,cleanup]
+
+job:
+    job_1:
+        config: config_cpu
+        clients:
+            localhost: 1
+    job_2:
+        config: config_lua
+        clients:
+            localhost: 1
+
+
+
+
+
