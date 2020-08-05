@@ -15,7 +15,10 @@ DEFAULT_MAX_WAIT = 7200
 def execute_on_target(hostname, cmd, username='kaushik.roy', password='dummy'):
         log.info("[{}] Exec cmd: {}".format(hostname, cmd))
         conn_obj = Connection(hostname, username, password)
-        return conn_obj.execute(cmd)
+        inp, out, ret = conn_obj.execute(cmd)
+        conn_obj.close()
+        #return conn_obj.execute(cmd)
+        return inp, out, ret
 
 
 
