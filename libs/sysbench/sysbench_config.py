@@ -60,22 +60,28 @@ class SysbenchConfig(object):
         else:
             return config_dict
 
-
-
     def _get_job_config(self, job_name=None):
-        job_dict = self.sysbench_config['job']
+        job_list = self.sysbench_config['job']
         if job_name:
-            log.info("Job Config Return {}".format(job_dict[job_name]))
-            return job_dict[job_name]
+            log.info("Job Config Return {}".format(job_list[job_name]))
+            return job_list[job_name]
         else:
-            log.info("Job Config Return {}".format(job_dict))
-            return job_dict
+            log.info("Job Config Return {}".format(job_list))
+            return job_list
 
     def _get_job_details(self):
 
         job_dict = dict()
         if self._job_name:
-            tmp_workload_cfg = self._get_job_config(self._job_name)
+            jobs = self._job_name
+        else:
+            jobs = [x for x in self._sysbench_cfg['job'].keys()]
+
+        import pdb;pdb.set_trace()
+            #self._process_config_client_dict(job,job_dict)
+
+        for job in jobs:
+            tmp_workload_cfg = self._get_job_config(job)
             config_name = tmp_workload_cfg['config']
 
             client_dict = tmp_workload_cfg['clients']
@@ -83,7 +89,6 @@ class SysbenchConfig(object):
             config_dict = self._get_sysbench_config(config_name)
             """ Contains options,testname and commands"""
             sysbench_cli = self._generate_cli_command(config_dict)
-            import pdb;pdb.set_trace()
 
             log.info("Generate CLi data {}".format(sysbench_cli))
             for client in tmp_workload_cfg['clients']:
@@ -92,26 +97,35 @@ class SysbenchConfig(object):
                 else:
                     job_dict[client] = sysbench_cli
                 job_dict[client] = job_dict[client] * client_dict[client]
-            return job_dict
-        else :
-            for job in self._get_job_config():
-                tmp_workload_cfg = self._get_job_config(job)
-                import pdb;pdb.set_trace()
-                config_name = tmp_workload_cfg['config']
 
-                client_dict = tmp_workload_cfg['clients']
-                """ contains client name and no of instances to be run"""
-                config_dict = self._get_sysbench_config(config_name)
-                """ Contains options,testname and commands"""
-                sysbench_cli = self._generate_cli_command(config_dict)
-                log.info("Generate CLi data {}".format(sysbench_cli))
-                for client in tmp_workload_cfg['clients']:
-                    if client in job_dict:
-                        job_dict[client].extend(sysbench_cli)
-                    else:
-                        job_dict[client] = sysbench_cli
-                    job_dict[client]= job_dict[client] * client_dict[client]
-            return job_dict
+        import pdb;pdb.set_trace()
+        return job_dict
+
+    def _process_config_client_dict(self, job, job_dict):
+        """" Process the job config and client config and generate
+        a dictionary with client name as the key and all the commands
+        to be run on that client as a list as value for that key
+        """
+
+        tmp_workload_cfg = self._get_job_config(job)
+        config_name = tmp_workload_cfg['config']
+
+        client_dict = tmp_workload_cfg['clients']
+        """ contains client name and no of instances to be run"""
+        config_dict = self._get_sysbench_config(config_name)
+        """ Contains options,testname and commands"""
+        sysbench_cli = self._generate_cli_command(config_dict)
+        import pdb;
+        pdb.set_trace()
+
+        log.info("Generate CLi data {}".format(sysbench_cli))
+        for client in tmp_workload_cfg['clients']:
+            if client in job_dict:
+                job_dict[client].extend(sysbench_cli)
+            else:
+                job_dict[client] = sysbench_cli
+            job_dict[client] = job_dict[client] * client_dict[client]
+        return job_dict
 
     def _generate_cli_command(self, config_dict):
         """
