@@ -1,4 +1,3 @@
-#!/usr/local/bin/python3
 class DBDefaults(object):
     DB_NAME = 'testDB'
     PORT = 3306

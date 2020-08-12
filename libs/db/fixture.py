@@ -1,7 +1,5 @@
-#!/usr/local/bin/python3
 import pytest
 from .session import DbSession
-
 
 @pytest.fixture(scope="function")
 def db_session_fxt(conn_params):

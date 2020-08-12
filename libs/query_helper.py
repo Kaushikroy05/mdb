@@ -1,4 +1,3 @@
-#!/usr/local/bin/python3
 # encoding=utf8
 
 import collections

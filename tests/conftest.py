@@ -15,8 +15,8 @@ lib_dir = os.path.abspath(
 
 sys.path.insert(0, lib_dir)
 
-import infra
-from connection import Connection
+from infra import print_banner
+
 
 LOGLEVELS = {
     'critical': logging.CRITICAL,
@@ -67,34 +67,34 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="session", autouse=True)
 def session_setup_teardown(request):
 
-    infra.print_banner("Enter session setup")
+    print_banner("Enter session setup")
 
-    infra.print_banner("Exit session setup")
+    print_banner("Exit session setup")
 
     yield
 
-    infra.print_banner("Enter session teardown")
+    print_banner("Enter session teardown")
 
-    infra.print_banner("Exit session teardown")
+    print_banner("Exit session teardown")
 
 
 @pytest.fixture(scope="function", autouse=True)
 def testcase_setup_teardown(request):
-    infra.print_banner(
+    print_banner(
         "Enter testcase ({}) setup".format(request.node.name)
     )
 
-    infra.print_banner(
+    print_banner(
         "Exit testcase ({}) setup".format(request.node.name)
     )
 
     yield
 
-    infra.print_banner(
+    print_banner(
         "Enter testcase ({}) teardown".format(request.node.name)
     )
 
-    infra.print_banner(
+    print_banner(
         "Exit testcase ({}) teardown".format(request.node.name)
     )
 

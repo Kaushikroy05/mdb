@@ -1,9 +1,7 @@
-#!/usr/local/bin/python3
 import logging
 import mysql.connector
 
 from .helper import DEFAULT_DB_SETTINGS
-from copy import copy
 
 log = logging.getLogger(__name__)
 

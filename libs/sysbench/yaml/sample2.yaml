@@ -34,8 +34,3 @@ job:
         config: config_lua
         clients:
             localhost: 1
-
-
-
-
-

@@ -1,10 +1,6 @@
-import sys
-sys.path.append("..")
-
+from cachedproperty import cached_property
 from yamlconfig import read_yaml
-
 from .sysbench_exception import SBMultipleJobs
-
 import logging
 
 log = logging.getLogger(__name__)
@@ -21,12 +17,11 @@ class SysbenchConfig(object):
 
     def __init__(
         self,
-        yaml_config,
-        job_name=None,
+        yaml_config,    # path to yaml config file
+        job_list=[],  # list of jobs to run (None - runs all jobs)
     ):
         self._yaml_config = yaml_config
-        self._job_name = job_name
-        self._cli_command_dict = None
+        self._job_list = job_list
         self._sysbench_cfg = read_yaml(self._yaml_config)
         ###################################################################
         # TODO - validate self._sysbench_cfg with SysbenchConfigValidator
@@ -37,23 +32,21 @@ class SysbenchConfig(object):
         return self._sysbench_cfg
 
     @property
-    def job_name(self):
+    def job_list(self):
         """
-        returns job name to run.
-        If job_name is not passed while creating SysbenchConfig object
-        then choose the only job defined in the yaml file. Else fail
+        returns job name to run
         """
-        if not self._job_name:
+        if not self._job_list:
             all_jobs = self._get_job_config()
-            if len(all_jobs) != 1:
-                raise SBMultipleJobs(
-                    "Only 1 job definition expected in config file {}".format(self._yaml_config)
-                )
-            self._job_name = all_jobs.popitem()[0]
+            self._job_list = [ job for job in all_jobs.keys() ]
 
-        return self._job_name
+        return self._job_list
 
     def _get_sysbench_config(self, config_name=None):
+        """
+        return sysbench config dictionary for 'config_name'
+        else return all sysbench configs in yaml file
+        """
         config_dict = self.sysbench_config['sysbench']
         if config_name:
             return config_dict[config_name]
@@ -61,6 +54,10 @@ class SysbenchConfig(object):
             return config_dict
 
     def _get_job_config(self, job_name=None):
+        """
+        returns job config dictionary got 'job_name'
+        else return all job configs in yaml file
+        """
         job_list = self.sysbench_config['job']
         if job_name:
             log.info("Job Config Return {}".format(job_list[job_name]))
@@ -69,65 +66,7 @@ class SysbenchConfig(object):
             log.info("Job Config Return {}".format(job_list))
             return job_list
 
-    def _get_job_details(self):
-
-        job_dict = dict()
-        if self._job_name:
-            jobs = self._job_name
-        else:
-            jobs = [x for x in self._sysbench_cfg['job'].keys()]
-
-        import pdb;pdb.set_trace()
-            #self._process_config_client_dict(job,job_dict)
-
-        for job in jobs:
-            tmp_workload_cfg = self._get_job_config(job)
-            config_name = tmp_workload_cfg['config']
-
-            client_dict = tmp_workload_cfg['clients']
-            """ contains client name and no of instances to be run"""
-            config_dict = self._get_sysbench_config(config_name)
-            """ Contains options,testname and commands"""
-            sysbench_cli = self._generate_cli_command(config_dict)
-
-            log.info("Generate CLi data {}".format(sysbench_cli))
-            for client in tmp_workload_cfg['clients']:
-                if client in job_dict:
-                    job_dict[client].extend(sysbench_cli)
-                else:
-                    job_dict[client] = sysbench_cli
-                job_dict[client] = job_dict[client] * client_dict[client]
-
-        import pdb;pdb.set_trace()
-        return job_dict
-
-    def _process_config_client_dict(self, job, job_dict):
-        """" Process the job config and client config and generate
-        a dictionary with client name as the key and all the commands
-        to be run on that client as a list as value for that key
-        """
-
-        tmp_workload_cfg = self._get_job_config(job)
-        config_name = tmp_workload_cfg['config']
-
-        client_dict = tmp_workload_cfg['clients']
-        """ contains client name and no of instances to be run"""
-        config_dict = self._get_sysbench_config(config_name)
-        """ Contains options,testname and commands"""
-        sysbench_cli = self._generate_cli_command(config_dict)
-        import pdb;
-        pdb.set_trace()
-
-        log.info("Generate CLi data {}".format(sysbench_cli))
-        for client in tmp_workload_cfg['clients']:
-            if client in job_dict:
-                job_dict[client].extend(sysbench_cli)
-            else:
-                job_dict[client] = sysbench_cli
-            job_dict[client] = job_dict[client] * client_dict[client]
-        return job_dict
-
-    def _generate_cli_command(self, config_dict):
+    def _generate_sysbenchcli_command(self, config_dict):
         """
         generate sysbench cli command from self.sysbench_config
         Keys : options, testname, commands (list)
@@ -141,29 +80,48 @@ class SysbenchConfig(object):
         # add testname
         cli_cmd += ' --test={}'.format(config_dict['testname'])
 
-        cmds = []
+        ret_cmd = ""
         # add command. For each command create a separate entry if
         # multiple commands are provided
-        import pdb;pdb.set_trace()
         if type(config_dict['commands']) is list:
-
-            for entry in config_dict['commands']:
-                cmds.append(cli_cmd+" "+entry)
-            log.info("Generated sysbench commands: {}".format(cmds))
-            return [";".join(cmds)]
+            for cmd in config_dict['commands']:
+                ret_cmd += "{} {};".format(cli_cmd, cmd)
         else:
-            cli_cmd += ' {}'.format(config_dict['commands'])
-            log.info("Generated sysbench commands: {}".format(cmds))
-            cmds.append(cli_cmd)
-            return cmds
+            ret_cmd = '{} {}'.format(cli_cmd, config_dict['commands'])
+
+        log_msg = "generated Sysbench cmd ( {} ) from config_dict ( {} )"
+        log.info( log_msg.format(ret_cmd, config_dict))
+        return ret_cmd
 
 
+    def _get_sysbench_for_joblist(self):
+        """
+        return dictionary of commands to be run on each client
+        """
+        job_dict = dict()
+        for job in self.job_list:
+            # get job dictionary
+            tmp_job_cfg = self._get_job_config(job)
+
+            # get sysbench config name and its dictionary
+            config_dict = self._get_sysbench_config(tmp_job_cfg['config'])
+
+            # get sysbench_cli to be run on each client
+            sysbench_cli = self._generate_sysbenchcli_command(config_dict)
+
+            # generate requested number of sysbench command for each client
+            for client, instances in tmp_job_cfg['clients'].items():
+                add_sysbench_cmds = [sysbench_cli] * instances
+                if client in job_dict:
+                    job_dict[client].extend(add_sysbench_cmds)
+                else:
+                    job_dict[client] = add_sysbench_cmds
+
+        return job_dict
+
+    @cached_property
     def get_cli_commands(self):
         """
-        get cli command to be executed
+        get cli commands to be executed
         """
-        if not self._cli_command_dict:
-            import pdb;pdb.set_trace()
-            self._cli_command_dict = self._get_job_details()
-        log.info(" Sending the command dict {}".format(self._cli_command_dict))
-        return self._cli_command_dict
+        return self._get_sysbench_for_joblist()

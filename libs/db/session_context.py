@@ -1,5 +1,4 @@
-#!/usr/localbin/python3
-from .helper import cached_property
+from cachedproperty import cached_property
 from .helper import get_random_identifier
 from .helper import MAX_USERNAME_LEN, MAX_IDENTIFIER_LEN
 from .db_defaults import DBDefaults

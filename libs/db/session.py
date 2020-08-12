@@ -1,16 +1,14 @@
-#!/usr/local/bin/python3
 import logging
 import time
 
 from .session_context import SessionContext
 from .helper import DEFAULT_DB_SETTINGS
-from .helper import MAX_IDENTIFIER_LEN
 from .helper import get_random_identifier
 from .helper import validate_conn_params
-from .helper import cached_property
-from .helper import MAX_USERNAME_LEN, MAX_IDENTIFIER_LEN
-from .db_defaults import DBDefaults
+from .helper import MAX_IDENTIFIER_LEN
 from .mariadb import MariaDB
+
+from cachedproperty import cached_property
 
 from .db_exception import (
     Error,

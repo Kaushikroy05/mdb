@@ -1,4 +1,3 @@
-#!/usr/local/bin/python3
 import uuid
 
 MAX_IDENTIFIER_LEN = 20  # Consider using the full length of 127
@@ -66,25 +65,3 @@ def validate_conn_params(conn_params):
         missing_params = list(set(required_keys) - set(conn_param_keys))
         raise ValueError(
             "Required field(s) missing: {}".format(str(missing_params)))
-
-
-
-class cached_property(object):
-    """
-    A property that is only computed once per instance and then replaces itself
-    with an ordinary attribute. Deleting the attribute resets the property.
-
-    The cached_property definition is cribbed from:
-    https://github.com/pydanny/cached-property/blob/master/cached_property.py
-    """
-
-    def __init__(self, func):
-        self.__doc__ = getattr(func, '__doc__')
-        self.func = func
-
-    def __get__(self, obj, cls):
-        if obj is None:
-            return self
-        value = obj.__dict__[self.func.__name__] = self.func(obj)
-        return value
-
