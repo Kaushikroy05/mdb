@@ -119,7 +119,6 @@ class SysbenchConfig(object):
 
         return job_dict
 
-    @cached_property
     def get_cli_commands(self):
         """
         get cli commands to be executed
