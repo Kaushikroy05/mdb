@@ -1,10 +1,6 @@
-import sys
-sys.path.append("..")
-
-from infra import execute_cmd
 from connection import Connection
 from .sysbench_config import SysbenchConfig
-from multiprocessing import Pool, Manager
+from multiprocessing import Pool
 
 import logging
 
@@ -12,14 +8,19 @@ log = logging.getLogger(__name__)
 
 DEFAULT_MAX_WAIT = 7200
 
-def execute_on_target(hostname, cmd, username='kaushik.roy', password='dummy'):
+def execute_on_target(
+        hostname,
+        cmd,
+        username='kaushik.roy',
+        password='dummy'
+    ):
         log.info("[{}] Exec cmd: {}".format(hostname, cmd))
-        conn_obj = Connection(hostname, username, password)
+        conn_obj = Connection(
+            hostname, username, password
+        )
         inp, out, ret = conn_obj.execute(cmd)
         conn_obj.close()
-        #return conn_obj.execute(cmd)
         return inp, out, ret
-
 
 
 class Sysbench(object):
@@ -54,7 +55,6 @@ class Sysbench(object):
 
         all_cmd_list = list()
         for host, cmd_list in self.sysbench_cli_commands.items():
-            import pdb;pdb.set_trace()
             all_cmd_list.extend([(host, cmd) for cmd in cmd_list])
 
         return all_cmd_list

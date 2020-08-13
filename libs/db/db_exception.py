@@ -1,4 +1,3 @@
-
 class Error(Exception):
     """
     Error class derived from Base Exception

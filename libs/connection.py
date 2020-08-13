@@ -1,5 +1,3 @@
-#!/usr/local/bin/python3
-import infra
 import paramiko
 from scp import SCPClient
 import baseexception as be

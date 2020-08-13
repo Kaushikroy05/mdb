@@ -1,4 +1,3 @@
-
 import logging
 import subprocess
 import shlex
@@ -19,7 +18,7 @@ def execute_cmd(cmd, timeout=DEFAULT_TIMEOUT):
     Execute cmd on local system and return stdout, stderr and exit status
     """
     with subprocess.Popen(
-        #shlex.split(cmd),
+        shlex.split(cmd),
         cmd,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
