@@ -115,5 +115,3 @@ class SysbenchParseLogfile:
 
         return sysbench_attributes
 
-a = SysbenchParseLogfile('/tmp/sql-sysbench.log')
-pprint( a )
