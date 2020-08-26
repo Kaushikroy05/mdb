@@ -85,7 +85,8 @@ class SysbenchConfig(object):
         # multiple commands are provided
         if type(config_dict['commands']) is list:
             for cmd in config_dict['commands']:
-                ret_cmd += "{} {};".format(cli_cmd, cmd)
+                ret_cmd += " {} {};".format(cli_cmd, cmd)
+            ret_cmd = "{ %s }" % ret_cmd
         else:
             ret_cmd = '{} {}'.format(cli_cmd, config_dict['commands'])
 
