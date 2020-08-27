@@ -10,3 +10,5 @@ from .session import DbSession
 
 from .fixture import db_session_fxt
 from .fixture import cursor_fxt
+
+from .execute_queries import ExecuteQueries

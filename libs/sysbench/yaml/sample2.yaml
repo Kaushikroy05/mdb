@@ -2,7 +2,7 @@ sysbench:
     config_cpu:
         options:
             mysql-host:     localhost
-            mysql-port:     3406
+            mysql-port:     3501
             mysql-user:     usertest
             mysql-password: TEST123
             mysql-socket:   /tmp/mariadbdev.sock
@@ -14,7 +14,7 @@ sysbench:
     config_lua:
         options:
             mysql-host:     localhost
-            mysql-port:     3406
+            mysql-port:     3501
             mysql-user:     usertest
             mysql-password: TEST123
             mysql-socket:   /tmp/mariadbdev.sock

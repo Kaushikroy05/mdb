@@ -1,26 +1,49 @@
 from connection import Connection
+from infra import execute_cmd
 from .sysbench_config import SysbenchConfig
+from .sysbench_log_parser import SysbenchParseLogfile
 from multiprocessing import Pool
 
 import logging
+import tempfile
 
 log = logging.getLogger(__name__)
 
 DEFAULT_MAX_WAIT = 7200
 
+def test_ex(a,b):
+    return a*b
+
 def execute_on_target(
         hostname,
         cmd,
         username='kaushik.roy',
-        password='dummy'
+        password='dummy',
+        parse_output=False,
     ):
+        if parse_output:
+            t_file = tempfile.NamedTemporaryFile()
+            cmd = "{} > {} 2>&1".format(cmd, t_file.name)
+
         log.info("[{}] Exec cmd: {}".format(hostname, cmd))
-        conn_obj = Connection(
-            hostname, username, password
-        )
-        inp, out, ret = conn_obj.execute(cmd)
-        conn_obj.close()
-        return inp, out, ret
+
+        #import pdb; pdb.set_trace()
+
+        if hostname in ['localhost', '127.0.0.1']:
+            out, err, ret = execute_cmd(cmd)
+        else:
+            conn_obj = Connection(
+                hostname, username, password
+            )
+            out, err, ret = conn_obj.execute(cmd)
+            conn_obj.close()
+
+        if parse_output:
+            out_dict = SysbenchParseLogfile(t_file.name)
+            t_file.close()
+            return out_dict
+        else:
+            return out, err, ret
 
 
 class Sysbench(object):
@@ -63,10 +86,10 @@ class Sysbench(object):
         """
         start IO
         """
-
         self._async_return = self._pool.starmap_async(
             execute_on_target, self._get_command_list()
         )
+        import pdb; pdb.set_trace()
 
         if not a_sync:
             self.wait_for_io_complete()

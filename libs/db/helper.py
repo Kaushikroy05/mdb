@@ -39,7 +39,6 @@ def get_random_identifier(max_len=MAX_IDENTIFIER_LEN, prefix_str=''):
 def validate_conn_params(conn_params):
     """
     Helper to validate conn_params dictionary. These fields must match:
-    http://initd.org/psycopg/docs/module.html
 
     conn_params = {
         'host': 'localhost',
