@@ -8,7 +8,7 @@ from .helper import validate_conn_params
 from .helper import MAX_IDENTIFIER_LEN
 from .mariadb import MariaDB
 
-from cachedproperty import cached_property
+from libs.cachedproperty import cached_property
 
 from .db_exception import (
     Error,
@@ -165,7 +165,11 @@ class DbSession(object):
         self.conn_settings = conn_settings or DEFAULT_DB_SETTINGS.copy()
 
         if not session_ctx:
-            self.session_ctx = SessionContext()
+            self.session_ctx = SessionContext(
+                username=self._base_conn_params['user'],
+                password=self._base_conn_params['password'],
+                dbname=self._base_conn_params['dbname'],
+            )
         else:
             if not isinstance(session_ctx, SessionContext):
                 raise ValueError(

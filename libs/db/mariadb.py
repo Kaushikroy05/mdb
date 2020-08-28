@@ -22,7 +22,7 @@ class MariaDB(object):
         self.settings = settings or DEFAULT_DB_SETTINGS.copy()
         self._autocommit = self.settings.get('autocommit', False)
 
-    def connect(self, debug=False):
+    def connect(self, debug=False, create_db=True):
         """
         Establishes connection to the database.
 
@@ -30,10 +30,29 @@ class MariaDB(object):
             connection: New connection object
         """
 
+        if create_db:
+            log.info(f"Creating database - {self.conn_params['dbname']}")
+            # create db with temporary connection
+            try:
+                tmp_conn =\
+                    mysql.connector.connect(host = self.conn_params['host'],
+                                        user = self.conn_params['user'],
+                                        password = self.conn_params['password'],
+                                        port = self.conn_params['port'])
+            except Exception as e:
+                log.error(str(e))
+                raise
+  
+            mycursor = tmp_conn.cursor()
+            mycursor.execute(f"create database if not exists "
+                             f"{self.conn_params['dbname']}")
+            tmp_conn.close() 
+
         log.debug(
             "Establishing connection to {} database".format(self.dbname)
         )
 
+        dir(self)
         self.connection = mysql.connector.connect(
             host = self.conn_params['host'],
             user = self.conn_params['user'],

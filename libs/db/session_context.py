@@ -1,4 +1,4 @@
-from cachedproperty import cached_property
+from libs.cachedproperty import cached_property
 from .helper import get_random_identifier
 from .helper import MAX_USERNAME_LEN, MAX_IDENTIFIER_LEN
 from .db_defaults import DBDefaults
