@@ -114,4 +114,3 @@ class SysbenchParseLogfile:
             sysbench_attributes['tps'] = tps_end_line
 
         return sysbench_attributes
-

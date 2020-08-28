@@ -1,8 +1,13 @@
-from connection import Connection
+from libs.connection import Connection
+from infra import execute_cmd
 from .sysbench_config import SysbenchConfig
 from multiprocessing import Pool
+from .sysbench_log_parser import SysbenchParseLogfile
+
 
 import logging
+import tempfile
+
 
 log = logging.getLogger(__name__)
 
@@ -14,14 +19,27 @@ def execute_on_target(
         username='kaushik.roy',
         password='dummy'
     ):
-        log.info("[{}] Exec cmd: {}".format(hostname, cmd))
+
+    if parse_output:
+        t_file = tempfile.NamedTemporaryFile()
+        cmd = "{} > {} 2>&1".format(cmd, t_file.name)
+
+    log.info("[{}] Exec cmd: {}".format(hostname, cmd))
+    if hostname in ['localhost', '127.0.0.1']:
+        out, err, ret = execute_cmd(cmd)
+    else:
         conn_obj = Connection(
             hostname, username, password
         )
-        inp, out, ret = conn_obj.execute(cmd)
+        out, err, ret = conn_obj.execute(cmd)
         conn_obj.close()
-        return inp, out, ret
 
+    if parse_output:
+        out_dict = SysbenchParseLogfile(t_file.name)
+        t_file.close()
+        return out_dict
+    else:
+        return out, err, ret
 
 class Sysbench(object):
 

@@ -1,4 +1,3 @@
-from .sysbench_config import SysbenchConfig
-from .sysbenchutil import Sysbench
-from .sysbench_exception import SBMultipleJobs
-from .sysbench_log_parser import SysbenchParseLogfile
+from libs.sysbench.sysbench_config import SysbenchConfig
+from libs.sysbench.sysbenchutil import Sysbench
+from libs.sysbench.sysbench_exception import SBMultipleJobs
