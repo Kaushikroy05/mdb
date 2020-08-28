@@ -26,10 +26,6 @@ sysbench:
         commands:   [prepare,run,cleanup]
 
 job:
-    job_1:
-        config: config_cpu
-        clients:
-            localhost: 1
     job_2:
         config: config_lua
         clients:
